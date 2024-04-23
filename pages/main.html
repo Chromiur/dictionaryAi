@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GET запрос</title>
+    <script>
+        function getAllWords() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        displayWordsAsCheckBoxes(response);
+                    } else {
+                        console.log('Ошибка: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.open('GET', 'http://localhost:1234/list', true);
+            xhr.send();
+        }
+
+        function addNewWord() {
+            var inputValue = document.getElementById('inputField').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        console.log('Успех');
+                    } else {
+                        console.log('Ошибка: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.open('POST', 'http://localhost:1234/add', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({word: inputValue}));
+        }
+
+        function displayWordsAsCheckBoxes(response) {
+            var listContainer = document.getElementById('responseList');
+            listContainer.innerHTML = ''; // очищаем контейнер перед добавлением новых элементов
+
+            for (var i = 0; i < response.length; i++) {
+                var listItem = document.createElement('li');
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = response[i].word; // предположим, что в ответе есть поле id
+                checkbox.id = response[i].id; // предположим, что в ответе есть поле id
+                listItem.appendChild(checkbox);
+
+                var label = document.createElement('label');
+                label.textContent = response[i].word; // предположим, что в ответе есть поле name
+                listItem.appendChild(label);
+
+                listContainer.appendChild(listItem);
+            }
+        }
+
+        function generateSentenceWithSelectedWords() {
+            var selectedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            var selectedData = [];
+
+            selectedCheckboxes.forEach(function (checkbox) {
+                selectedData.push(checkbox.value);
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var responseJson = JSON.parse(xhr.responseText);
+                        displayResultJson(responseJson);
+                    } else {
+                        console.log('Ошибка: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.open('POST', 'http://localhost:1234/generateSentence', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({words: selectedData}));
+        }
+
+        function deleteSelectedWords() {
+            var selectedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            var selectedData = [];
+
+            selectedCheckboxes.forEach(function (checkbox) {
+                selectedData.push(parseInt(checkbox.id));
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var responseJson = JSON.parse(xhr.responseText);
+                        displayResultJson(responseJson);
+                    } else {
+                        console.log('Ошибка: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.open('DELETE', 'http://localhost:1234/deleteWords', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({wordsIdToDelete: selectedData}));
+        }
+
+        function displayResultJson(result) {
+            var resultForRussianMessageContainer = document.getElementById('resultForRussianMessage');
+            var resultForEngMessageContainer = document.getElementById('resultForEngMessage');
+            resultForRussianMessageContainer.textContent = result.generatedRussianSentence;
+            resultForEngMessageContainer.textContent = result.generatedEngSentence;
+        }
+
+        function toggleBlur() {
+            var blurredDiv = document.getElementById('resultForEngMessage');
+            blurredDiv.classList.toggle('blurred');
+        }
+
+    </script>
+    <style>
+        .blurred {
+            color: transparent;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<input type="text" id="inputField" placeholder="enter new word">
+<button onclick="addNewWord()">Save new word</button>
+
+<button onclick="getAllWords()">Get all words</button>
+<ul id="responseList"></ul>
+<button onclick="generateSentenceWithSelectedWords()">Generate new sentance</button>
+<button onclick="deleteSelectedWords()">Delete selected words</button>
+<div id="resultForRussianMessage"></div>
+
+<div id="resultForEngMessage" class="blurred" onclick="toggleBlur()"></div>
+</body>
+</html>
