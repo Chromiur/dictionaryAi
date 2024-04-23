@@ -17,5 +17,3 @@ CREATE TABLE WordsList (
     Word VARCHAR(100),
     Description VARCHAR(200)
 );
-
-INSERT INTO WordsList (ID, UserID, Word, Description) VALUES (1, 1, 'Hello', 'Привет')
