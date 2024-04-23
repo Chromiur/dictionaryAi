@@ -25,7 +25,7 @@ func TranslateMessageRequest(messageOnRussian string) (string, error) {
 }
 
 func GenerateRequest(message string) (string, error) {
-	apiKey := "YOUR-API-KEY"
+	apiKey := openApiKey
 	client := resty.New()
 	//engMessage := fmt.Sprintf("Hi, can you please generate the sentence with thees words: %+q", words)
 

@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GET запрос</title>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var checkboxesContainer = document.getElementById('checkboxesContainer');
+            var submitButton1 = document.getElementById('generateSentenceButton');
+            var submitButton2 = document.getElementById('deleteButton');
+
+            checkboxesContainer.addEventListener('change', function(event) {
+                if (event.target.matches('input[type="checkbox"]')) {
+                    var anyChecked = Array.from(checkboxesContainer.querySelectorAll('input[type="checkbox"]')).some(function(checkbox) {
+                        return checkbox.checked;
+                    });
+
+                    submitButton1.style.display = anyChecked ? 'block' : 'none';
+                    submitButton2.style.display = anyChecked ? 'block' : 'none';
+                }
+            });
+        });
+
+
+
         function getAllWords() {
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
@@ -40,7 +59,7 @@
         }
 
         function displayWordsAsCheckBoxes(response) {
-            var listContainer = document.getElementById('responseList');
+            var listContainer = document.getElementById('responseWithWordList');
             listContainer.innerHTML = ''; // очищаем контейнер перед добавлением новых элементов
 
             for (var i = 0; i < response.length; i++) {
@@ -133,9 +152,12 @@
 <button onclick="addNewWord()">Save new word</button>
 
 <button onclick="getAllWords()">Get all words</button>
-<ul id="responseList"></ul>
-<button onclick="generateSentenceWithSelectedWords()">Generate new sentance</button>
-<button onclick="deleteSelectedWords()">Delete selected words</button>
+<div id="checkboxesContainer">
+    <ul id="responseWithWordList"></ul>
+</div>
+
+<button id="generateSentenceButton" style="display: none;" onclick="generateSentenceWithSelectedWords()">Generate new sentance</button>
+<button id="deleteButton" style="display: none;" onclick="deleteSelectedWords()">Delete selected words</button>
 <div id="resultForRussianMessage"></div>
 
 <div id="resultForEngMessage" class="blurred" onclick="toggleBlur()"></div>

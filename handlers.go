@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dictionaryAi/restDb"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -8,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"rServer/restDb"
 	"time"
 )
 

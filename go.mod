@@ -1,4 +1,4 @@
-module rServer
+module dictionaryAi
 
 go 1.22
 
