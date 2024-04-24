@@ -7,15 +7,6 @@ import (
 	"strings"
 )
 
-// Connection details
-const (
-	Hostname = "localhost"
-	Port     = 5432
-	Username = "ivankhromin"
-	Password = "budva2024"
-	Database = "dictionary_db"
-)
-
 // Userdata is for holding full word data
 // Userdata table + Username
 type WordData struct {
@@ -23,25 +14,6 @@ type WordData struct {
 	UserId      int
 	Word        string `json:"word"`
 	Description string `json:"description"`
-}
-
-func openConnection() (*sql.DB, error) {
-	// connection string
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", Hostname, Port, Username, Password, Database)
-
-	// open database
-	db, err := sql.Open("postgres", psqlconn)
-	if err != nil {
-		return nil, err
-	}
-
-	// check db
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
 
 // The function returns the Word ID of the word
@@ -59,7 +31,6 @@ func exists(word string) int {
 	ID := -1
 
 	statement := fmt.Sprintf(`SELECT id FROM words where word = '%s'`, word)
-	fmt.Println(statement)
 	rows, err := db.Query(statement)
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -91,7 +62,6 @@ func AddWord(d WordData) int {
 	}
 	defer db.Close()
 
-	//fmt.Println(d)
 	wordID := exists(d.Word)
 	if wordID != -1 {
 		fmt.Println("Word already exists:", Username)
@@ -99,7 +69,6 @@ func AddWord(d WordData) int {
 	}
 
 	insertStatement := `insert into "words" (word) values ($1)`
-	fmt.Println(insertStatement)
 	_, err = db.Exec(insertStatement, d.Word)
 	if err != nil {
 		fmt.Println(err)
@@ -110,8 +79,6 @@ func AddWord(d WordData) int {
 	if wordID == -1 {
 		return wordID
 	}
-
-	fmt.Println("TEST")
 
 	insertStatement = `insert into "wordslist" ("id", "userid", "word", "description")
 	values ($1, $2, $3, $4)`
@@ -140,9 +107,6 @@ func DeleteWords(ids []int) error {
 			fmt.Println("Error: ", err)
 			return err
 		}
-
-		fmt.Println(statement)
-		fmt.Println(rows)
 
 		var word string
 		for rows.Next() {

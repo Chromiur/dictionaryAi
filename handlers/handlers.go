@@ -1,14 +1,13 @@
-package main
+package handlers
 
 import (
+	"dictionaryAi/ai"
 	"dictionaryAi/restDb"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"net/http"
-	"path/filepath"
 	"time"
 )
 
@@ -89,13 +88,13 @@ func GenerateSentenceHandler(rw http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(d, &words)
 
-	russianMessage, err := GenerateRussianMessageRequest(words.Words)
+	russianMessage, err := ai.GenerateRussianMessageRequest(words.Words)
 
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		log.Println(err)
 	}
-	engMessage, err := TranslateMessageRequest(russianMessage)
+	engMessage, err := ai.TranslateMessageRequest(russianMessage)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		log.Println(err)
@@ -120,26 +119,9 @@ func SliceToJSON(slice interface{}, w io.Writer) error {
 	return e.Encode(slice)
 }
 
-func MainPageHandler(w http.ResponseWriter, r *http.Request) {
-	//указываем путь к нужному файлу
-	path := filepath.Join("pages", "main.html")
-	//создаем html-шаблон
-	tmpl, err := template.ParseFiles(path)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-	//выводим шаблон клиенту в браузер
-	err = tmpl.Execute(w, nil)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-}
+type NotAllowedHandler struct{}
 
-type notAllowedHandler struct{}
-
-func (h notAllowedHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (h NotAllowedHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	MethodNotAllowedHandler(rw, r)
 }
 
@@ -195,8 +177,6 @@ func DeleteHandler(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Error:", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Println(wordsListToDelete)
 
 	err = restDb.DeleteWords(wordsListToDelete.WordsId)
 	if err != nil {

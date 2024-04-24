@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dictionaryAi/handlers"
 	"log"
 	"net/http"
 	"os"
@@ -31,45 +32,45 @@ func main() {
 		IdleTimeout:  10 * time.Second,
 	}
 
-	rMux.NotFoundHandler = http.HandlerFunc(DefaultHandler)
+	rMux.NotFoundHandler = http.HandlerFunc(handlers.DefaultHandler)
 
-	notAllowed := notAllowedHandler{}
+	notAllowed := handlers.NotAllowedHandler{}
 	rMux.MethodNotAllowedHandler = notAllowed
 
-	rMux.HandleFunc("/", MainPageHandler)
+	rMux.HandleFunc("/", handlers.MainPageHandler)
 
 	// Define Handler Functions
 	// Register GET
 	getMux := rMux.Methods(http.MethodGet).Subrouter()
-
-	getMux.HandleFunc("/list", WordsListHandler)
+	//Get list of the words
+	getMux.HandleFunc("/list", handlers.WordsListHandler)
+	//Get list of Users
 	//getMux.HandleFunc("/getid/{username}", GetIDHandler)
 	//getMux.HandleFunc("/logged", LoggedUsersHandler)
 	//getMux.HandleFunc("/username/{id:[0-9]+}", GetUserDataHandler)
 
 	// Register PUT
 	// Update User
-	//putMux := rMux.Methods(http.MethodPut).Subrouter()
-	//putMux.HandleFunc("/update", UpdateHandler)
+	putMux := rMux.Methods(http.MethodPut).Subrouter()
+	putMux.HandleFunc("/update", handlers.UpdateUserHandler)
 
 	// Register POST
-	// Add User + Login + Logout
 	postMux := rMux.Methods(http.MethodPost).Subrouter()
-	postMux.HandleFunc("/add", AddHandler)
-	postMux.HandleFunc("/generateSentence", GenerateSentenceHandler)
+	// Add Words
+	postMux.HandleFunc("/add", handlers.AddHandler)
+	// Generate Sentence from words
+	postMux.HandleFunc("/generateSentence", handlers.GenerateSentenceHandler)
+	// Add User + Login + Logout
+	postMux.HandleFunc("/addUser", handlers.AddUserHandler)
 	//postMux.HandleFunc("/login", LoginHandler)
 	//postMux.HandleFunc("/logout", LogoutHandler)
 
 	// Register DELETE
-	// Delete User
+	// Delete Words
 	deleteMux := rMux.Methods(http.MethodDelete).Subrouter()
-	deleteMux.HandleFunc("/deleteWords", DeleteHandler)
-
-	/*mux.Handle("/time", http.HandlerFunc(timeHandler))
-	mux.Handle("/add", http.HandlerFunc(addHandler))
-	mux.Handle("/list", http.HandlerFunc(WordsListHandler))
-	mux.Handle("/generateSentence", http.HandlerFunc(generateSentenceHandler))
-	mux.Handle("/", http.HandlerFunc(mainPageHandler))*/
+	deleteMux.HandleFunc("/deleteWords", handlers.DeleteHandler)
+	// Delete User
+	deleteMux.HandleFunc("/deleteUser", handlers.DeleteUserHandler)
 
 	go func() {
 		log.Println("Listening to", PORT)
